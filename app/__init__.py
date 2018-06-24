@@ -16,6 +16,8 @@ def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(app_config[config_name])
     from app.endpoints.auth import auth_namespace as auth
+    from app.endpoints.request import request_namespace as user
     api.add_namespace(auth, path='/auth')
+    api.add_namespace(user, "/user")
     api.init_app(app)
     return app
