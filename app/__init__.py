@@ -15,4 +15,7 @@ del api.namespaces[0]
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(app_config[config_name])
+    from app.endpoints.auth import auth_namespace as auth
+    api.add_namespace(auth, path='/auth')
+    api.init_app(app)
     return app
