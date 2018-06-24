@@ -1,9 +1,8 @@
 from flask import Flask
 from flask_restplus import Api
+from app.configurations.config import app_config
 
-app = Flask(__name__)
 api = Api(
-    app,
     version="1.0",
     title="Maintenance API",
     description="A simple Maintenance API",
@@ -11,3 +10,9 @@ api = Api(
 
 #delete default namespace
 del api.namespaces[0]
+
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(app_config[config_name])
+    return app
