@@ -2,8 +2,17 @@ from flask import Flask
 from flask_restplus import Api
 from app.configurations.config import app_config
 
+authorization = {
+    'apikey': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'access_token'
+    }
+}
+
 api = Api(
     version="1.0",
+    authorizations=authorization,
     title="Maintenance API",
     description="A simple Maintenance API",
     prefix='/api/v1')

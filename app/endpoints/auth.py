@@ -6,6 +6,7 @@ from flask_bcrypt import Bcrypt
 from app.models.user import User, users_data
 import json
 import re
+import os
 
 auth_namespace = Namespace(
     'auth', description='Authentication Related Operation.')
@@ -52,10 +53,10 @@ pattern = re.compile(r"(^[A-Za-z]+$)")
 class Signup(Resource):
     """Handles registration Routes."""
 
-    @auth_namespace.doc('List all users')
-    def get(self):
-        """List all users registered"""
-        return users_data
+    # @auth_namespace.doc('List all users')
+    # def get(self):
+    #     """List all users registered"""
+    #     return users_data
 
     @auth_namespace.doc('create new user')
     @auth_namespace.expect(registration_model)
@@ -70,7 +71,10 @@ class Signup(Resource):
         user = User(first_name, last_name, email, password)
         user.create()
 
-        return {"status": "successfully registered"}, 201
+        return {
+            "status": "successfully registered",
+            'secret': os.getenv('SECRET', '')
+        }, 201
 
 
 @auth_namespace.route('/login')
@@ -93,7 +97,15 @@ class Login(Resource):
         if user_email in users_data:
             if Bcrypt().check_password_hash(users_data[user_email]["Password"],
                                             user_password):
-                return {"message": "successfully Login"}, 200
+
+                # # generate the auth token
+                auth_token = User.encode_auth_token(user_email)
+
+                return {
+                    'status': 'success',
+                    'message': 'Successfully registered.',
+                    'auth_token': auth_token.decode()
+                }, 200
             else:
                 return {
                     "message": "Failed, Invalid password! Please try again"
