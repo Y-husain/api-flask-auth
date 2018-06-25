@@ -4,6 +4,8 @@ from flask_restplus import Resource, Namespace, fields
 from flask import request
 from flask_bcrypt import Bcrypt
 from app.models.user import User, users_data
+from app.models.token import token_required
+from app.models.blacklist import BlacklistToken
 import json
 import re
 import os
@@ -67,8 +69,8 @@ class Signup(Resource):
         user.create()
 
         return {
-            "status": "successfully registered",
-            'secret': os.getenv('SECRET', '')
+            'status': 'success',
+            'message': 'Successfully registered.'
         }, 201
 
 
@@ -107,3 +109,44 @@ class Login(Resource):
                 }, 401
         else:
             return {"message": "Failed, Invalid email! Please try again"}, 401
+
+
+@auth_namespace.route('/logout')
+@auth_namespace.doc(
+    responses={
+        201: 'Successfully login',
+        401: 'Invalid credential'
+    },
+    security="apikey")
+class Logout(Resource):
+    """Handles logout Routes"""
+
+    @token_required
+    def post(self, current_user):
+        """Handle POST request for logout"""
+
+        # get auth token
+        auth_header = request.headers.get('apikey')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        if auth_token:
+            resp = User.decode_auth_token(auth_token)
+            if not isinstance(resp, str):
+                # mark the token as blacklisted
+                try:
+                    BlacklistToken(token=auth_token)
+                    return {
+                        'status': 'success',
+                        'message': 'Successfully logged out.'
+                    }, 200
+                except Exception as e:
+                    return {'status': 'Failed to logout', 'message': e}, 200
+            else:
+                return {'status': 'fail', 'message': resp}, 401
+        else:
+            return {
+                'status': 'fail',
+                'message': 'Provide a valid auth token.'
+            }, 403
