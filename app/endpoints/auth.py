@@ -53,11 +53,6 @@ pattern = re.compile(r"(^[A-Za-z]+$)")
 class Signup(Resource):
     """Handles registration Routes."""
 
-    # @auth_namespace.doc('List all users')
-    # def get(self):
-    #     """List all users registered"""
-    #     return users_data
-
     @auth_namespace.doc('create new user')
     @auth_namespace.expect(registration_model)
     def post(self):

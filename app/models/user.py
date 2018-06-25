@@ -43,7 +43,8 @@ class User:
                 'sub':
                 user_id
             }
-            return jwt.encode(payload, os.getenv('SECRET'), algorithm='HS256')
+            return jwt.encode(
+                payload, os.getenv('SECRET'), algorithm='HS256')
         except Exception as e:
             return e
 
