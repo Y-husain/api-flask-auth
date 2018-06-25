@@ -81,20 +81,29 @@ class UpdateRequest(Resource):
 
     def get(self, requestID):
         """Fetch a request that belongs to a logged in user"""
-        return requests_data[requestID]
+        a_req = [req for req in requests_data if req['ID'] == requestID]
+        if len(a_req) == 0:
+            return {'message': 'No request found'}
+        return a_req
 
     @request_namespace.expect(request_model)
     def put(self, requestID):
         """Modify a request."""
-        data = request.get_json(requestID)
-        user_request = data["Request"]
-        category = data["Category"]
-        duration = data["Duration"]
-        location = data["Location"]
-        reqst_update = Request(user_request, duration, location, category)
-        reqst_update.create()
-
-        return {"status": "Request successfully updated"}
+        update_data = [
+            req_data for req_data in requests_data
+            if req_data["ID"] == requestID
+        ]
+        if len(update_data) == 0:
+            return {'message': 'No request found'}
+        else:
+            data = request.get_json()
+            user_request = update_data[0]["Request"] = data["Request"]
+            category = update_data[0]["Category"] = data["Category"]
+            duration = update_data[0]["Duration"] = data["Duration"]
+            location = update_data[0]["Location"] = data["Location"]
+            reqst = Request(user_request, duration, location, category)
+            reqst.create()
+            return {"status": " Request successfully created"}, 201
 
     @request_namespace.expect(request_model)
     def delete(self, requestID):

@@ -1,4 +1,4 @@
-requests_data = {}
+requests_data = []
 
 
 class Request:
@@ -13,12 +13,11 @@ class Request:
 
     def create(self):
         my_request = {
-            Request.requestID: {
-                "Request": self.request,
-                "Duration": self.duration,
-                "Location": self.location,
-                "category": self.category
-            }
+            "ID": Request.requestID,
+            "Request": self.request,
+            "Duration": self.duration,
+            "Location": self.location,
+            "category": self.category
         }
         Request.requestID += 1
-        return requests_data.update(my_request)
+        return requests_data.append(my_request)
