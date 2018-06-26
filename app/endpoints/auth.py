@@ -5,7 +5,7 @@ from flask import request
 from flask_bcrypt import Bcrypt
 from app.models.user import User, users_data
 from app.models.token import token_required
-from app.models.blacklist import BlacklistToken
+from app.models.blacklist import Blacklist, blacklist
 import json
 import re
 import os
@@ -126,27 +126,18 @@ class Logout(Resource):
         """Handle POST request for logout"""
 
         # get auth token
-        auth_header = request.headers.get('apikey')
-        if auth_header:
-            auth_token = auth_header.split(" ")[1]
-        else:
-            auth_token = ''
-        if auth_token:
-            resp = User.decode_auth_token(auth_token)
-            if not isinstance(resp, str):
-                # mark the token as blacklisted
-                try:
-                    BlacklistToken(token=auth_token)
-                    return {
-                        'status': 'success',
-                        'message': 'Successfully logged out.'
-                    }, 200
-                except Exception as e:
-                    return {'status': 'Failed to logout', 'message': e}, 200
-            else:
-                return {'status': 'fail', 'message': resp}, 401
+        token = request.headers['access_token']
+
+        # mark the token as blacklisted
+        try:
+            revokedToken = Blacklist(token)
+            revokedToken.save_blacklist()
+
+        except Exception as e:
+            return {'status': 'Failed to logout', 'message': str(e)}, 200
+
         else:
             return {
-                'status': 'fail',
-                'message': 'Provide a valid auth token.'
-            }, 403
+                'status': 'success',
+                'message': 'Successfully logged out.'
+            }, 200

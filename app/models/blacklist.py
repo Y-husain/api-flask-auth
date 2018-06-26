@@ -1,7 +1,10 @@
-blacklist_token = []
+blacklist = []
+class Blacklist:
+    """users class"""
 
-class BlacklistToken:
-    """store blacklist data"""
-    def __init___(self, token):
+    def __init__(self, token):
+        global blacklist
         self.token = token
-        blacklist_token.append(token)
+
+    def save_blacklist(self):
+        blacklist.append(self.token)
